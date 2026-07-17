@@ -1,0 +1,35 @@
+{
+  "name": "@personal-os/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "lint": "eslint . --max-warnings=0",
+    "start": "expo start",
+    "typecheck": "tsc --noEmit",
+    "validate": "expo export --platform android --output-dir dist",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@personal-os/config": "workspace:*",
+    "@personal-os/database-contracts": "workspace:*",
+    "@personal-os/domain": "workspace:*",
+    "@personal-os/sync-contracts": "workspace:*",
+    "@personal-os/utils": "workspace:*",
+    "@personal-os/validation": "workspace:*",
+    "expo": "57.0.6",
+    "expo-constants": "~57.0.6",
+    "expo-linking": "~57.0.3",
+    "expo-router": "~57.0.7",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17"
+  }
+}

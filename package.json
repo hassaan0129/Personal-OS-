@@ -1,0 +1,36 @@
+{
+  "name": "personal-os",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=22 <25",
+    "pnpm": ">=11.10.0 <12"
+  },
+  "scripts": {
+    "build:web": "turbo run build --filter=@personal-os/web",
+    "dev:mobile": "pnpm --filter @personal-os/mobile start",
+    "dev:web": "pnpm --filter @personal-os/web dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "turbo run lint",
+    "supabase:reset": "supabase db reset --local",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:test": "supabase test db --local",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "validate:mobile": "turbo run validate --filter=@personal-os/mobile",
+    "verify": "python scripts/verify.py"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.7.0",
+    "prettier": "3.9.5",
+    "supabase": "2.109.1",
+    "turbo": "2.10.5",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.64.0",
+    "vitest": "4.1.10"
+  }
+}

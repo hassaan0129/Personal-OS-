@@ -1,0 +1,12 @@
+# Local Supabase CLI configuration only. This file contains no hosted project reference.
+project_id = "personal-os-local"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+port = 54322
+major_version = 17

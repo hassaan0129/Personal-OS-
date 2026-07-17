@@ -1,0 +1,43 @@
+# Copy only the integrations you need into ~/.codex/config.toml.
+# Never hard-code tokens. Prefer least-privilege credentials and development resources.
+
+# Official OpenAI documentation: safe to enable by default.
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+default_tools_approval_mode = "auto"
+
+# Official GitHub MCP. Create a least-privilege PAT and expose it as GITHUB_PAT_TOKEN.
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_PAT_TOKEN"
+default_tools_approval_mode = "writes"
+
+# Official Playwright MCP for browser testing.
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+default_tools_approval_mode = "prompt"
+disabled_tools = ["browser_run_code_unsafe"]
+
+# Official Supabase MCP. Replace PROJECT_REF and keep read_only=true.
+# Do not connect this to production.
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp?project_ref=PROJECT_REF&read_only=true"
+default_tools_approval_mode = "auto"
+
+# Official Vercel MCP. Use preview projects first and prompt for writes.
+[mcp_servers.vercel]
+url = "https://mcp.vercel.com"
+default_tools_approval_mode = "writes"
+
+# Official n8n documentation MCP.
+[mcp_servers.n8nDocs]
+url = "https://docs.n8n.io/~gitbook/mcp"
+default_tools_approval_mode = "auto"
+
+# n8n instance MCP. Replace the domain and expose the token as N8N_MCP_TOKEN.
+# Keep production workflow mutation behind approval.
+[mcp_servers.n8n]
+url = "https://YOUR_N8N_DOMAIN/mcp-server/http"
+bearer_token_env_var = "N8N_MCP_TOKEN"
+default_tools_approval_mode = "writes"

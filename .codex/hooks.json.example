@@ -1,0 +1,3 @@
+{
+  "note": "install_project.py generates .codex/hooks.json with absolute cross-platform script paths. Run the installer instead of copying this file manually."
+}

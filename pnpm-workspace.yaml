@@ -1,0 +1,19 @@
+packages:
+  - apps/*
+  - packages/*
+
+# `sharp` is a transitive optional dependency of Next.js. Phase 0 does not use
+# `next/image` or self-hosted image optimization, so its native build is denied.
+# Revisit this explicit decision before either capability is introduced.
+allowBuilds:
+  sharp: false
+
+# Expo selected these exact SDK 57 packages on 2026-07-17. They are explicitly
+# exempted from this workstation's release-age policy so a frozen install can
+# validate the committed lockfile. Remove the entries once the policy window
+# has elapsed or when the Expo SDK is upgraded.
+minimumReleaseAgeExclude:
+  - '@expo/metro-runtime@57.0.6'
+  - '@expo/ui@57.0.7'
+  - expo-constants@57.0.6
+  - expo-router@57.0.7

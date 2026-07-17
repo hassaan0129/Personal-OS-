@@ -1,0 +1,30 @@
+# Safe everyday defaults.
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+project_doc_max_bytes = 65536
+allow_login_shell = false
+
+[sandbox_workspace_write]
+network_access = false
+
+[features]
+hooks = true
+memories = true
+multi_agent = true
+goals = true
+
+[agents]
+max_threads = 6
+max_depth = 1
+interrupt_message = true
+
+# Read-only official documentation MCPs.
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+default_tools_approval_mode = "auto"
+
+[mcp_servers.n8nDocs]
+url = "https://docs.n8n.io/~gitbook/mcp"
+default_tools_approval_mode = "auto"

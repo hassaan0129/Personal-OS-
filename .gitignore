@@ -1,0 +1,25 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Builds and test output
+.next/
+apps/web/.next/
+apps/mobile/dist/
+apps/mobile/.expo/
+.turbo/
+coverage/
+
+# Local environment and Supabase CLI state
+.env
+.env.*
+!.env.example
+supabase/.temp/
+
+# Tooling and operating-system files
+.codex/.state/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db

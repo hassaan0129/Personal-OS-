@@ -1,0 +1,11 @@
+node_modules/
+.next/
+apps/web/next-env.d.ts
+.expo/
+dist/
+coverage/
+.turbo/
+.codex/
+pnpm-lock.yaml
+supabase/.temp/
+codex-power-kit/

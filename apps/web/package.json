@@ -1,0 +1,28 @@
+{
+  "name": "@personal-os/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint . --max-warnings=0",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@personal-os/config": "workspace:*",
+    "@personal-os/database-contracts": "workspace:*",
+    "@personal-os/domain": "workspace:*",
+    "@personal-os/sync-contracts": "workspace:*",
+    "@personal-os/utils": "workspace:*",
+    "@personal-os/validation": "workspace:*",
+    "next": "16.2.10",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3"
+  }
+}

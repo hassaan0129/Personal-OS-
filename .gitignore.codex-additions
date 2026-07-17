@@ -1,0 +1,5 @@
+# Merge these lines into the repository .gitignore
+.codex/.state/
+.env
+.env.*
+!.env.example

@@ -1,0 +1,13 @@
+# Clear, repeatable, low-risk tasks.
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = false
+
+[features]
+hooks = true
+memories = true
+multi_agent = false
