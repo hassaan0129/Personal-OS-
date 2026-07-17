@@ -13,11 +13,16 @@ import {
   createTaskCommandSchema,
   emailPasswordCredentialsSchema,
   repairPreviousLifeDayCommandSchema,
+  reorderTaskCommandSchema,
   rescheduleTaskCommandSchema,
+  reopenTaskCommandSchema,
+  resolveUnfinishedTaskCommandSchema,
+  setTaskTopThreeCommandSchema,
   startLifeDayCommandSchema,
   currentLifeDayReadSchema,
   todayTaskReadSchema,
   todaySnapshotSchema,
+  updateTaskCommandSchema,
 } from '@personal-os/validation';
 import { z } from 'zod';
 
@@ -167,9 +172,14 @@ type StartLifeDayCommand = z.input<typeof startLifeDayCommandSchema>;
 type CloseLifeDayCommand = z.input<typeof closeLifeDayCommandSchema>;
 type RepairLifeDayCommand = z.input<typeof repairPreviousLifeDayCommandSchema>;
 type CreateTaskCommand = z.input<typeof createTaskCommandSchema>;
+type UpdateTaskCommand = z.input<typeof updateTaskCommandSchema>;
 type CompleteTaskCommand = z.input<typeof completeTaskCommandSchema>;
 type RescheduleTaskCommand = z.input<typeof rescheduleTaskCommandSchema>;
 type CancelTaskCommand = z.input<typeof cancelTaskCommandSchema>;
+type ReorderTaskCommand = z.input<typeof reorderTaskCommandSchema>;
+type SetTaskTopThreeCommand = z.input<typeof setTaskTopThreeCommandSchema>;
+type ReopenTaskCommand = z.input<typeof reopenTaskCommandSchema>;
+type ResolveUnfinishedTaskCommand = z.input<typeof resolveUnfinishedTaskCommandSchema>;
 
 export function createLifeDayCommandAdapter(client: RpcClient) {
   return {
@@ -256,6 +266,31 @@ export function createTaskCommandAdapter(client: RpcClient) {
         commandResultSchema,
       );
     },
+    async update(input: UpdateTaskCommand): Promise<CommandResult> {
+      const command = updateTaskCommandSchema.parse(input);
+      return callRpc(
+        client,
+        'command_update_task',
+        {
+          p_operation_id: command.metadata.operationId,
+          p_device_id: command.metadata.deviceId,
+          p_expected_revision: command.metadata.baseRevision,
+          p_client_occurred_at: command.metadata.clientOccurredAt,
+          p_client_timezone: command.metadata.clientTimezone,
+          p_task_id: command.payload.taskId,
+          p_life_day_id: command.payload.lifeDayId,
+          p_title: command.payload.title,
+          p_description: command.payload.description,
+          p_status: command.payload.status,
+          p_priority: command.payload.priority,
+          p_scheduled_at: command.payload.scheduledAt,
+          p_scheduled_timezone: command.payload.scheduledTimezone,
+          p_estimated_minutes: command.payload.estimatedMinutes,
+          p_position: command.payload.position,
+        },
+        commandResultSchema,
+      );
+    },
     async complete(input: CompleteTaskCommand): Promise<CommandResult> {
       const command = completeTaskCommandSchema.parse(input);
       return callRpc(
@@ -309,6 +344,82 @@ export function createTaskCommandAdapter(client: RpcClient) {
           p_cancelled_at: command.payload.cancelledAt,
           p_reason_code: command.payload.reason.code,
           p_reason_note: command.payload.reason.note ?? null,
+        },
+        commandResultSchema,
+      );
+    },
+    async reorder(input: ReorderTaskCommand): Promise<CommandResult> {
+      const command = reorderTaskCommandSchema.parse(input);
+      return callRpc(
+        client,
+        'command_reorder_task',
+        {
+          p_operation_id: command.metadata.operationId,
+          p_device_id: command.metadata.deviceId,
+          p_expected_revision: command.metadata.baseRevision,
+          p_client_occurred_at: command.metadata.clientOccurredAt,
+          p_client_timezone: command.metadata.clientTimezone,
+          p_task_id: command.payload.taskId,
+          p_position: command.payload.position,
+        },
+        commandResultSchema,
+      );
+    },
+    async setTopThree(input: SetTaskTopThreeCommand): Promise<CommandResult> {
+      const command = setTaskTopThreeCommandSchema.parse(input);
+      return callRpc(
+        client,
+        'command_set_task_top_three',
+        {
+          p_operation_id: command.metadata.operationId,
+          p_device_id: command.metadata.deviceId,
+          p_expected_revision: command.metadata.baseRevision,
+          p_client_occurred_at: command.metadata.clientOccurredAt,
+          p_client_timezone: command.metadata.clientTimezone,
+          p_task_id: command.payload.taskId,
+          p_is_top_three: command.payload.isTopThree,
+        },
+        commandResultSchema,
+      );
+    },
+    async reopen(input: ReopenTaskCommand): Promise<CommandResult> {
+      const command = reopenTaskCommandSchema.parse(input);
+      return callRpc(
+        client,
+        'command_reopen_task',
+        {
+          p_operation_id: command.metadata.operationId,
+          p_device_id: command.metadata.deviceId,
+          p_expected_revision: command.metadata.baseRevision,
+          p_client_occurred_at: command.metadata.clientOccurredAt,
+          p_client_timezone: command.metadata.clientTimezone,
+          p_task_id: command.payload.taskId,
+          p_life_day_id: command.payload.lifeDayId,
+        },
+        commandResultSchema,
+      );
+    },
+    async resolveUnfinished(input: ResolveUnfinishedTaskCommand): Promise<CommandResult> {
+      const command = resolveUnfinishedTaskCommandSchema.parse(input);
+      const payload = command.payload;
+      return callRpc(
+        client,
+        'command_resolve_unfinished_task',
+        {
+          p_operation_id: command.metadata.operationId,
+          p_device_id: command.metadata.deviceId,
+          p_expected_revision: command.metadata.baseRevision,
+          p_client_occurred_at: command.metadata.clientOccurredAt,
+          p_client_timezone: command.metadata.clientTimezone,
+          p_task_id: payload.taskId,
+          p_resolution: payload.resolution,
+          p_target_life_day_id:
+            payload.resolution === 'reschedule' ? payload.targetLifeDayId : null,
+          p_scheduled_at: payload.resolution === 'reschedule' ? payload.scheduledAt : null,
+          p_scheduled_timezone:
+            payload.resolution === 'reschedule' ? payload.scheduledTimezone : null,
+          p_reason_code: payload.resolution === 'reschedule' ? payload.reason.code : null,
+          p_reason_note: payload.resolution === 'reschedule' ? (payload.reason.note ?? null) : null,
         },
         commandResultSchema,
       );

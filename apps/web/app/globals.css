@@ -14,13 +14,173 @@ body {
   color: #1c1c1e;
 }
 
-main {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: 2rem;
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-section {
-  max-width: 42rem;
+button,
+.link-button {
+  border: 0;
+  border-radius: 0.5rem;
+  background: #244a3c;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.65rem 0.9rem;
+  text-decoration: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+button.secondary,
+.link-button {
+  background: #e7ece9;
+  color: #18362b;
+}
+button.danger {
+  background: #a83939;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+input,
+select,
+textarea {
+  border: 1px solid #c7d0cb;
+  border-radius: 0.4rem;
+  padding: 0.6rem;
+  width: 100%;
+}
+textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 2rem;
+}
+.workspace {
+  margin: 0 auto;
+  max-width: 72rem;
+}
+.auth-shell {
+  align-items: center;
+  display: grid;
+  place-items: center;
+}
+.auth-panel {
+  max-width: 26rem;
+  width: 100%;
+}
+.topbar,
+.life-day-panel,
+.task-heading,
+.resolve-row {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.topbar {
+  margin-bottom: 1.5rem;
+}
+.topbar h1,
+.panel h2,
+.task-card h3 {
+  margin: 0.15rem 0;
+}
+.panel {
+  background: #fff;
+  border: 1px solid #dde5df;
+  border-radius: 0.8rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  margin-bottom: 1rem;
+  padding: 1.1rem;
+}
+.today-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+.task-fields {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  margin: 1rem 0;
+}
+.checkbox-label {
+  align-items: center;
+  display: flex;
+  font-weight: 600;
+}
+.checkbox-label input {
+  margin-right: 0.5rem;
+  width: auto;
+}
+.task-card {
+  border-top: 1px solid #e5ebe7;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+.task-card > p {
+  margin: 0.35rem 0;
+}
+.task-heading span,
+.task-meta,
+.eyebrow {
+  color: #587065;
+  font-size: 0.86rem;
+}
+.eyebrow {
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  margin: 0;
+  text-transform: uppercase;
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.error {
+  background: #fff0f0;
+  border: 1px solid #f0b3b3;
+  border-radius: 0.5rem;
+  color: #842727;
+  padding: 0.75rem;
+}
+.action-panel {
+  background: #f4f8f5;
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+}
+.action-panel h4 {
+  margin: 0;
+}
+.resolve-row {
+  border-top: 1px solid #e5ebe7;
+  padding: 0.7rem 0;
+}
+@media (max-width: 42rem) {
+  .app-shell {
+    padding: 1rem;
+  }
+  .topbar,
+  .life-day-panel,
+  .resolve-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

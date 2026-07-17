@@ -145,6 +145,14 @@ environment supports its native binary requirements.
 - **Decision:** Enable local Supabase email/password sign-up and sign-in, with email confirmation disabled only in the local CLI configuration. Clients use the publishable key only. Social login, password reset, hosted configuration, and service-role use remain out of scope.
 - **Consequences:** The local flow is immediately testable, while production email confirmation and redirect policy require a separate deployment decision.
 
+## ADR-0015: Enforce daily Top 3 and unfinished resolution in command functions
+
+- **Date:** 2026-07-18
+- **Status:** accepted
+- **Context:** Planner Mode needs a usable Top 3 and a non-silent sleep resolution path, while multiple clients can issue commands concurrently.
+- **Decision:** Store `is_top_three` on tasks and enforce no more than three active selections for a Life Day inside the transactional command layer with a per-user/day advisory lock. Keep Planner Mode as a UI mode only; every write still uses owner-scoped command RPCs. Resolve unfinished tasks explicitly by cancellation, overdue status, or a scheduled move outside the closing Life Day; a later-target Life Day is optional and must be owned/open.
+- **Consequences:** The current date-only reschedule path does not create a future Life Day implicitly, preserving the rule against silent lifecycle changes. Ordering uses numeric positions and up/down controls; drag-and-drop is deferred.
+
 ## Decisions to resolve in later phases
 
 1. Define precise progress metric/rollup formulas and historical recalculation rules before Progress Tracking.

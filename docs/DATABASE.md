@@ -1,7 +1,13 @@
 # Database
 
 Last updated: 2026-07-18
-Status: Phase 1A schema and Phase 1B authenticated Today read migrations are local-only and validated against the local Supabase stack. No hosted project or external connection has been created.
+Status: Phase 1A schema, Phase 1B authenticated Today read migrations, and the Phase 1C Planner Mode task extension are local-only. No hosted project or external connection has been created.
+
+## Implemented Phase 1C task extension
+
+`20260718020000_add_planner_mode_task_commands.sql` adds `tasks.is_top_three boolean not null default false` and an active-selection index. The existing `tasks` table already stores title, optional description, priority, scheduled timestamp/timezone (both nullable for flexible work), estimated minutes, numeric manual position, status, revision, and timestamps.
+
+New command functions are `command_reorder_task`, `command_set_task_top_three`, `command_reopen_task`, and `command_resolve_unfinished_task`. They use the existing `command_operations`, `task_events`, `change_events`, and `sync_changes` transaction pattern. Task event types now include reorder, Top 3, reopen, overdue resolution, and rescheduled resolution. Table grants and RLS remain unchanged: authenticated clients can read only their owner rows and cannot directly write tasks or access command operations.
 
 ## Phase 1B read boundary
 

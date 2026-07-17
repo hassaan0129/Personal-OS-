@@ -1,7 +1,13 @@
 # API
 
 Last updated: 2026-07-18
-Status: Phase 1B adds local email/password clients and narrow authenticated Today read RPCs to the Phase 1A command functions. No Edge Function or hosted service has been created.
+Status: Phase 1C extends the local-only Phase 1B client with daily Planner Mode commands. No Edge Function or hosted service has been created.
+
+## Phase 1C Planner Mode command RPCs
+
+`command_reorder_task`, `command_set_task_top_three`, `command_reopen_task`, and `command_resolve_unfinished_task` are authenticated `SECURITY DEFINER` RPCs with the same operation id, expected revision, ownership, task-event, redacted change-event, and sync-cursor behavior as the Phase 1A task commands. `command_update_task` remains the full mutable active-task replacement used for title, description, priority, scheduled/flexible state, estimate, and position edits.
+
+`command_set_task_top_three` serializes active selections per user/Life Day and returns `top_three_limit` when a fourth active task is selected. `command_resolve_unfinished_task` explicitly keeps a planned/in-progress task overdue or moves it to a later scheduled date (and optionally another active Life Day in the RPC contract); it requires a structured reason for rescheduling. Cancellation continues through `command_cancel_task` with its required structured reason. These operations never grant direct table writes.
 
 ## Phase 1B implemented Today read RPCs
 

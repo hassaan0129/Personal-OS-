@@ -196,6 +196,43 @@ describe('command adapters', () => {
     expect(functionNames).toEqual(['command_create_task', 'command_complete_task']);
   });
 
+  it('maps planner commands through typed command RPCs', async () => {
+    const functionNames: string[] = [];
+    const client: RpcClient = {
+      rpc: async (functionName) => {
+        functionNames.push(functionName);
+        return {
+          data: {
+            operationId: ids.operation,
+            status: 'accepted',
+            entity: { type: 'task', id: ids.task, revision: 2, data: {} },
+            syncCursor: 2,
+          },
+          error: null,
+        };
+      },
+    };
+    const tasks = createTaskCommandAdapter(client);
+    await tasks.reorder({
+      metadata: { ...metadata, commandName: 'task.reorder', baseRevision: 1 },
+      payload: { taskId: ids.task, position: 2 },
+    });
+    await tasks.setTopThree({
+      metadata: { ...metadata, commandName: 'task.set_top_three', baseRevision: 1 },
+      payload: { taskId: ids.task, isTopThree: true },
+    });
+    await tasks.resolveUnfinished({
+      metadata: { ...metadata, commandName: 'task.resolve_unfinished', baseRevision: 1 },
+      payload: { taskId: ids.task, resolution: 'overdue' },
+    });
+
+    expect(functionNames).toEqual([
+      'command_reorder_task',
+      'command_set_task_top_three',
+      'command_resolve_unfinished_task',
+    ]);
+  });
+
   it('preserves a repair-required or revision-conflict result for UI recovery', async () => {
     const client = rpcResponse({
       operationId: ids.operation,

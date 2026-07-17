@@ -176,6 +176,30 @@ export const updateTaskCommandSchema = z.object({
   }),
 });
 
+export const reorderTaskCommandSchema = z.object({
+  metadata: commandMetadataSchema,
+  payload: z.object({
+    taskId: taskIdSchema,
+    position: positionSchema,
+  }),
+});
+
+export const setTaskTopThreeCommandSchema = z.object({
+  metadata: commandMetadataSchema,
+  payload: z.object({
+    taskId: taskIdSchema,
+    isTopThree: z.boolean(),
+  }),
+});
+
+export const reopenTaskCommandSchema = z.object({
+  metadata: commandMetadataSchema,
+  payload: z.object({
+    taskId: taskIdSchema,
+    lifeDayId: lifeDayIdSchema,
+  }),
+});
+
 export const completeTaskCommandSchema = z.object({
   metadata: commandMetadataSchema,
   payload: z.object({
@@ -200,6 +224,22 @@ export const cancelTaskCommandSchema = z.object({
     cancelledAt: utcTimestampSchema,
     reason: structuredReasonSchema,
   }),
+});
+
+export const resolveUnfinishedTaskCommandSchema = z.object({
+  metadata: commandMetadataSchema,
+  payload: z.discriminatedUnion('resolution', [
+    z.object({
+      taskId: taskIdSchema,
+      resolution: z.literal('overdue'),
+    }),
+    taskScheduleSchema.extend({
+      taskId: taskIdSchema,
+      resolution: z.literal('reschedule'),
+      targetLifeDayId: lifeDayIdSchema.nullable(),
+      reason: structuredReasonSchema,
+    }),
+  ]),
 });
 
 const localDateSchema = z
@@ -238,6 +278,7 @@ export const todayTaskReadSchema: z.ZodType<TodayTaskRead> = z.object({
   scheduledTimezone: ianaTimeZoneSchema.nullable(),
   estimatedMinutes: estimatedMinutesSchema,
   position: positionSchema,
+  isTopThree: z.boolean(),
   completedAt: utcTimestampSchema.nullable(),
   revision: revisionSchema,
   createdAt: utcTimestampSchema,
@@ -276,6 +317,7 @@ export const commandResultSchema: z.ZodType<CommandResult> = z.discriminatedUnio
         'unresolved_tasks',
         'revision_conflict',
         'invalid_transition',
+        'top_three_limit',
       ]),
       message: z.string().min(1),
     }),
@@ -303,6 +345,7 @@ export const commandResultSchema: z.ZodType<CommandResult> = z.discriminatedUnio
         'unresolved_tasks',
         'revision_conflict',
         'invalid_transition',
+        'top_three_limit',
       ]),
       message: z.string().min(1),
     }),

@@ -115,6 +115,10 @@ Measures are proposed; baseline and targets must be chosen after an instrumented
 
 ## Finalized V1 operating decisions
 
+## Implemented Phase 1C daily planning slice
+
+The implemented daily Planner Mode is deliberately narrower than future weekly/monthly planning. It allows an authenticated owner to create and edit a Life Day task, set it scheduled or flexible, choose one of the three V1 priorities, set an estimate, order it with simple controls, select up to three active Top 3 tasks, and explicitly resolve unfinished work before sleep. Execution Mode remains focused on completion; destructive planner actions are presented only in Planner Mode.
+
 - A Life Day begins only through the explicit wake action and ends only through the explicit sleep action. The command's IANA zone is stored with its UTC instant; naps do not close a day; missed sleep requires explicit repair.
 - Mobile supports offline Today, task, wake/sleep, journal, and completion access in V1. Web offline support is deferred.
 - Unfinished tasks never roll over automatically. At sleep, users must reschedule, keep overdue, or cancel with a reason.

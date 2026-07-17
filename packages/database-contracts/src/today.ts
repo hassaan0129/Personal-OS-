@@ -33,6 +33,7 @@ export interface TodayTaskRead {
   readonly scheduledTimezone: IanaTimeZone | null;
   readonly estimatedMinutes: number | null;
   readonly position: number;
+  readonly isTopThree: boolean;
   readonly completedAt: UtcTimestamp | null;
   readonly revision: Revision;
   readonly createdAt: UtcTimestamp;

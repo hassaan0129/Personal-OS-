@@ -1,7 +1,7 @@
 # Roadmap
 
 Last updated: 2026-07-18
-Status: Phase 0, Phase 1A, and the narrow Phase 1B local authenticated Today flow are implemented and locally validated. Later product work remains planned.
+Status: Phase 0, Phase 1A, Phase 1B, and the narrow Phase 1C daily Planner Mode flow are implemented. Later product work remains planned.
 
 ## Delivery principles
 
@@ -15,9 +15,10 @@ Status: Phase 0, Phase 1A, and the narrow Phase 1B local authenticated Today flo
 - [x] Phase 0: pnpm/Turborepo, Next.js, Expo Router, framework-free shared contracts, strict checks, CI, and local Supabase project structure.
 - [x] Phase 1A: Life Day/task schema, command RPCs, idempotency, revision conflicts, audit/change records, RLS, and local pgTAP coverage.
 - [x] Phase 1B: local email/password auth, session restoration, profile/current-Life-Day/Today read RPCs, typed client adapters, and minimal web/mobile Today actions.
-- [x] Local migration reset and pgTAP validation (34 tests on 2026-07-18).
+- [x] Phase 1C: daily Planner Mode, task editing/order/scheduling/Top 3, unfinished-task resolution, and web/mobile online-only controls.
+- [x] Local migration reset and pgTAP validation (58 tests on 2026-07-18).
 
-## Phase 1C - Offline Today synchronization
+## Phase 1D - Offline Today synchronization
 
 **Outcome:** Mobile can safely use the narrow Today workflow while offline and reconcile exactly once when it reconnects.
 
@@ -29,12 +30,12 @@ Status: Phase 0, Phase 1A, and the narrow Phase 1B local authenticated Today flo
 
 **Exit criteria:** supported Today commands survive reconnect without duplicate writes or silent data loss, and the app clearly presents unresolved conflicts.
 
-## Phase 2 - Goals and Planner Mode
+## Phase 2 - Goals and period planning
 
 **Outcome:** The user can connect long-term goals and projects to selected month/week priorities and daily work.
 
 - [ ] Add goals, projects, planning periods, period-goal links, ordering, history, and owner-scoped commands.
-- [ ] Build narrow Planner Mode reads and edits for web and mobile.
+- [ ] Build month/week planning reads and edits for web and mobile; daily Planner Mode remains a separate implemented slice.
 - [ ] Define and test period boundaries, travel/time-zone behavior, and planning conflicts.
 
 ## Phase 3 - Execution and Progress Tracking

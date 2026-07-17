@@ -14,7 +14,8 @@ export type CommandErrorCode =
   | 'repair_required'
   | 'unresolved_tasks'
   | 'revision_conflict'
-  | 'invalid_transition';
+  | 'invalid_transition'
+  | 'top_three_limit';
 
 export interface SafeCommandError {
   readonly code: CommandErrorCode;

@@ -1,7 +1,13 @@
 # Architecture
 
 Last updated: 2026-07-18
-Status: recommended target architecture. Phase 1B adds local email/password authentication, typed Supabase adapters, authenticated Today read RPCs, and minimal web/mobile Today surfaces. Offline replication and hosted infrastructure remain unimplemented.
+Status: recommended target architecture. Phase 1C adds daily Planner Mode task commands and compact web/mobile planner surfaces on the Phase 1B authentication/read foundation. Offline replication and hosted infrastructure remain unimplemented.
+
+## Phase 1C daily planner boundary
+
+Planner Mode is a product interaction mode, not an authorization boundary. The web app gets its auth, Today-read, Life Day-command, and task-command adapters from one browser-only Supabase client singleton; the adapters do not create clients. Mobile uses its own module singleton with SecureStore-backed Auth persistence. On both platforms, Planner Mode calls the same typed command RPCs as the execution UI.
+
+`tasks.is_top_three` is a small mutable task projection field. The database command layer holds a transaction advisory lock and counts active selections so no active Life Day can exceed three. Every accepted planner command increments the task revision, appends a task event, creates a redacted change summary, and emits a sync-cursor hint. No Planner Mode feature has direct table write privileges, an offline store, a realtime subscription, or a service-role key.
 
 ## Phase 1B client boundary
 

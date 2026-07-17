@@ -1,6 +1,6 @@
 # Personal OS
 
-Personal OS is a private web and mobile workspace for turning long-term goals into daily execution and reflection. This repository contains the Phase 0 foundation, the Phase 1A Life Day/Today command boundary, and Phase 1B local email/password authentication with minimal web and mobile Today experiences. It still has no mobile offline replica/outbox, goals, journals, reminders, sync engine, or hosted Supabase project.
+Personal OS is a private web and mobile workspace for turning long-term goals into daily execution and reflection. This repository contains the Phase 0 foundation, Phase 1A Life Day/Today command boundary, Phase 1B local authentication, and Phase 1C daily Planner Mode/task-management slice. It still has no mobile offline replica/outbox, goals, journals, reminders, sync engine, or hosted Supabase project.
 
 ## Stack
 
@@ -46,7 +46,7 @@ On Windows PowerShell environments that block package-manager scripts, use `pnpm
 
    In each app file, set only `*_SUPABASE_URL` and `*_SUPABASE_PUBLISHABLE_KEY` to the API URL and publishable/anon key reported by your local Supabase CLI. Do not use, copy, or commit the service-role key. Local email confirmation is disabled solely in `supabase/config.toml`, so a local email/password sign-up can be used immediately.
 
-3. Start the web app at [http://localhost:3000](http://localhost:3000). Sign up or sign in, then use the minimal authenticated Today flow:
+3. Start the web app at [http://localhost:3000](http://localhost:3000). Sign up or sign in, use Today for execution, and open [Planner Mode](http://localhost:3000/planner) to create, edit, order, schedule, prioritise, select Top 3, cancel, reschedule, and resolve unfinished tasks:
 
    ```bash
    pnpm --filter @personal-os/web dev
@@ -54,7 +54,7 @@ On Windows PowerShell environments that block package-manager scripts, use `pnpm
 
    Health route: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
-4. Start the Expo development server. It uses the same local public configuration and supports sign-in, session restoration, Life Day wake/sleep, task creation, and task completion:
+4. Start the Expo development server. It uses the same local public configuration and supports sign-in, session restoration, Life Day wake/sleep, execution actions, and a compact online-only Planner Mode:
 
    ```bash
    pnpm --filter @personal-os/mobile start
@@ -87,7 +87,7 @@ pnpm supabase:test
 
 `supabase:reset` rebuilds the **local** database from migrations. `supabase:test` runs the pgTAP RLS suite in `supabase/tests/` against that running local database. Stop the stack with `pnpm supabase:stop` when finished.
 
-The local migration set and pgTAP suite were last reset and run successfully on 2026-07-18 (`Files=3`, `Tests=34`). The commands remain the required validation path after every schema change.
+The local migration set and pgTAP suite include Phase 1C Planner Mode coverage (`Files=4`, `Tests=58` in the latest local run). The commands remain the required validation path after every schema change.
 
 ## Dependency build-script policy
 
@@ -96,8 +96,8 @@ pnpm 11 uses the explicit `allowBuilds` policy in `pnpm-workspace.yaml`. Phase 0
 ## Repository layout
 
 ```text
-apps/web/                         Next.js local-authenticated Today surface
-apps/mobile/                      Expo Router local-authenticated Today surface
+apps/web/                         Next.js authenticated Today and Planner Mode surfaces
+apps/mobile/                      Expo Router authenticated Today and compact Planner Mode surface
 packages/api-client/              Typed Supabase Auth, Today-read, and command-RPC adapters
 packages/domain/                  Branded identifiers, time, revision, command metadata
 packages/validation/              Zod command and environment validation schemas

@@ -20,6 +20,7 @@ const plannedTask: Task = {
   scheduledTimezone: null,
   estimatedMinutes: 30,
   position: 1,
+  isTopThree: false,
   completedAt: null,
   revision: 1 as Revision,
 };
