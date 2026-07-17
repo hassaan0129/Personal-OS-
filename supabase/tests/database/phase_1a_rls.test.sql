@@ -45,12 +45,14 @@ select throws_ok(
   $$insert into public.tasks (user_id, title, status, priority)
     values ('20000000-0000-4000-8000-000000000002'::uuid, 'Direct write', 'planned', 'progress')$$,
   '42501',
+  null,
   'Direct task writes are denied; callers must use command RPCs'
 );
 
 select throws_ok(
   'select * from public.command_operations',
   '42501',
+  null,
   'Command idempotency records are not directly exposed'
 );
 
