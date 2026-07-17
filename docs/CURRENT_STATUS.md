@@ -1,43 +1,36 @@
 # Current Status
 
-Last updated: 2026-07-17
+Last updated: 2026-07-18
 
 ## Repository state
 
-This repository contains a Phase 0 technical foundation plus the Phase 1A Life Day and Today backend foundation. It has a pnpm/Turborepo workspace, minimal Next.js and Expo Router applications, strict shared contracts, local-only SQL migrations/RLS/RPCs, unit tests, and pull-request verification CI. It has no hosted Supabase project, authentication UI, product screens, mobile local replica/outbox, notifications, goals, journals, analytics, AI, deployment, or production credentials.
+Phase 0, Phase 1A, and Phase 1B are implemented in this local-only repository. The workspace has a pnpm/Turborepo layout, strict TypeScript, local Supabase migrations and RLS/RPC tests, a typed Supabase client adapter, and minimal Next.js/Expo authenticated Today surfaces. No hosted Supabase project, production credential, deployment, or source-control push has been made.
 
-The bundled `codex-power-kit/` is a reusable setup kit, not product source. Its templates, scripts, rules, hooks, and skills were inspected and intentionally left unchanged.
+Phase 1B adds local email/password sign-up, sign-in, sign-out, session restoration, owner-scoped Today reads, and the narrow Life Day/task command actions already implemented in Phase 1A. Web and mobile use only the public local Supabase configuration and typed adapters; they do not write database tables directly.
 
-## Completed in this planning phase
+## Verified capabilities
 
-- Product scope, architecture, data model, API/sync plan, and phased roadmap documented.
-- pnpm/Turborepo workspace created with `apps/web`, `apps/mobile`, and six shared TypeScript packages.
-- Strict TypeScript, Prettier, ESLint, Vitest, full verification script, and GitHub Actions pull-request workflow configured.
-- Local Supabase structure and an Auth-linked, RLS-protected `profiles` migration added without connecting to Supabase Cloud.
-- Minimal web health route and mobile launch surface added; neither implements a product feature.
-- Phase 1A adds Life Day, task, task-event, idempotency, audit, and sync-change schema; authenticated command RPCs; shared command contracts; and a local pgTAP RLS suite.
+- `supabase db reset --local` applies the profile, Phase 1A, and Phase 1B migrations.
+- `supabase test db --local` passes 34 pgTAP assertions across three files, including RLS and owner-scoped Today read behavior.
+- The web surface exposes sign-in/sign-up, active-Life-Day status, wake/sleep/repair actions, Today task list, create/complete/cancel/reschedule actions, and command conflict feedback.
+- The mobile surface exposes sign-in/sign-up, session restoration, wake/sleep, task create/complete, loading, and error states through the same typed adapters.
+- pnpm 11 uses an explicit per-dependency `allowBuilds` policy. `sharp` remains denied until an image-optimization capability requires a reviewed decision.
 
-## Important planning conclusions
+## Known limitations and risks
 
-- The planned stack is retained: `pnpm` + Turborepo, Next.js web, Expo mobile, shared TypeScript packages, and Supabase/Postgres.
-- V1 decisions are now finalized: explicit wake/sleep Life Days, UTC plus IANA zones, mobile offline support for Today/tasks/wake-sleep/journals/completion, no automatic rollover, recurring task occurrences, mobile-only notifications, private journals, permanent task/goal history, 90-day delivery records, 30-day trash, and approval-gated AI changes.
-- Phase 0 deliberately has no Supabase client, SQLite, notification, or sync implementation. Realtime remains an invalidation signal—not a sync engine—when those capabilities are introduced.
+- Mobile has no SQLite replica or durable outbox yet, so it is online-only despite the V1 offline requirement. Web offline support is still intentionally deferred.
+- Mobile persists the Auth session in Expo SecureStore, but Phase 1B has not been tested on a physical device or emulator. Its Android static export is the only mobile runtime validation in this phase.
+- There are no realtime subscriptions, notifications, recurrence, goals, projects, journals, progress analytics, AI, account recovery, social login, or deployment workflows.
+- The local Auth configuration disables email confirmation only for development. Production email, redirect, and password-reset policy require a separate decision.
+- End-user UI conflict and repair states are minimal. The command boundary returns safe `repair_required` and `revision_conflict` contracts, but richer recovery UX belongs in a later phase.
 
-## Known gaps and risks
+## Required local workflow
 
-- The Supabase CLI is installed locally, but Docker Desktop's `dockerDesktopLinuxEngine` pipe is unavailable. `pnpm supabase:start` therefore cannot start the stack; migrations and pgTAP RLS tests have not run and must not be treated as validated.
-- Expo SDK/package compatibility and the local Android static export have been verified. No mobile emulator or physical device has been started yet.
-- pnpm 11 explicitly denies the optional transitive `sharp` build in `pnpm-workspace.yaml`. This is valid only while the application does not use `next/image`, standalone hosting, or self-hosted image optimization; revisit it before any of those capabilities are added.
-- The V1 sync engine, local SQLite replica/outbox, notifications, recurring-occurrence engine, trash jobs, progress formulas, and AI approval flow remain future work.
-- Current repository hooks provide command policy, changed-file secret scanning, and automatic verification attempts. Native Git hooks are only stock sample hooks.
+1. Start Docker Desktop, then run `pnpm supabase:start`.
+2. Run `pnpm supabase:reset` and `pnpm supabase:test` after migration changes.
+3. Put only the local API URL and publishable/anon key in the ignored web/mobile environment files. Never add a service-role key.
+4. Run `python scripts/verify.py` before handoff.
 
-## Current verification state
+## Next recommended scope
 
-- Product/documentation planning: complete; V1 decisions supplied for implementation are recorded above.
-- Application format/lint/typecheck/tests/web build/mobile validation: passed through `python scripts/verify.py` after the Phase 1A changes on 2026-07-17.
-- Local database migration and RLS validation: blocked by unavailable Docker runtime; no hosted connection was attempted.
-- External services, deploys, hosted connections, and pushes: intentionally not performed.
-
-## Next safest step
-
-Start Docker Desktop, run `pnpm supabase:start`, `pnpm supabase:reset`, and `pnpm supabase:test`, then record the result. After that, Phase 1B can add authenticated Today reads and command adapters without introducing full screens, mobile SQLite, or sync.
+Phase 1C should add a narrow, tested mobile SQLite Today replica and durable command outbox: authenticated local hydration, queued wake/sleep/task completion writes, idempotent retry, owner-bound sign-out clearing, sync cursor pull, and explicit stale/revision-conflict recovery. It must not add goals, notifications, journals, planner mode, or realtime subscriptions before that offline slice is proven.

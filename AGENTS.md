@@ -5,7 +5,7 @@ This file extends the global Codex rules.
 ## Project identity
 
 - **Product:** Personal OS, a private web and mobile system for planning, execution, reflection, and progress tracking.
-- **Current objective:** Phase 1A Life Day and Today backend foundation; do not build product screens, offline storage, notifications, goals, journals, analytics, AI, or deployment until their approved phases.
+- **Current objective:** Phase 1B local authentication and minimal Today experience; do not add offline product storage, notifications, goals, journals, analytics, AI, or deployment until their approved phases.
 - **Primary stack:** pnpm/Turborepo, Next.js App Router, Expo/React Native/Expo Router, strict TypeScript, Zod, and local Supabase migration structure.
 - **Package manager:** pnpm 11.10+ (`pnpm.cmd` may be required in restricted Windows PowerShell).
 - **Supported runtimes:** Node.js 22 LTS (`>=22 <25`); Python 3.10+ for verification.

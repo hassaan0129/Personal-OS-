@@ -7,9 +7,11 @@
     "dev": "next dev",
     "lint": "eslint . --max-warnings=0",
     "start": "next start",
+    "test": "vitest run --pool=threads --maxWorkers=1 --no-fileParallelism",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@personal-os/api-client": "workspace:*",
     "@personal-os/config": "workspace:*",
     "@personal-os/database-contracts": "workspace:*",
     "@personal-os/domain": "workspace:*",

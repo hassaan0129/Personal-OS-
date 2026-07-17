@@ -10,3 +10,14 @@ extra_search_path = ["public", "extensions"]
 [db]
 port = 54322
 major_version = 15
+
+# Phase 1B local-only email/password authentication. Hosted Auth configuration
+# is deliberately out of scope; local sign-ups are immediately usable so the
+# minimal authenticated flow can be tested without sending real email.
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000"]
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false

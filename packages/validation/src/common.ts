@@ -9,8 +9,16 @@ import type {
   TaskId,
   TaskPriority,
   UtcTimestamp,
+  UserId,
 } from '@personal-os/domain';
-import { taskPriorities, taskReasonCodes } from '@personal-os/domain';
+import { taskPriorities, taskReasonCodes, taskStatuses } from '@personal-os/domain';
+import type {
+  CurrentLifeDayRead,
+  ProfileRow,
+  TodaySnapshot,
+  TodayTaskRead,
+} from '@personal-os/database-contracts';
+import type { CommandResult } from '@personal-os/sync-contracts';
 import { z } from 'zod';
 
 export const uuidSchema = z.uuid();
@@ -19,6 +27,7 @@ export const operationIdSchema = uuidSchema.transform((value) => value as Operat
 export const deviceIdSchema = uuidSchema.transform((value) => value as DeviceId);
 export const lifeDayIdSchema = uuidSchema.transform((value) => value as LifeDayId);
 export const taskIdSchema = uuidSchema.transform((value) => value as TaskId);
+export const userIdSchema = uuidSchema.transform((value) => value as UserId);
 
 export const revisionSchema = z
   .number()
@@ -191,4 +200,118 @@ export const cancelTaskCommandSchema = z.object({
     cancelledAt: utcTimestampSchema,
     reason: structuredReasonSchema,
   }),
+});
+
+const localDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .transform((value) => value as CurrentLifeDayRead['operationalDate']);
+const taskStatusSchema = z.enum(taskStatuses);
+
+export const profileReadSchema: z.ZodType<ProfileRow> = z.object({
+  id: userIdSchema,
+  homeTimezone: ianaTimeZoneSchema,
+  revision: revisionSchema,
+  createdAt: utcTimestampSchema,
+  updatedAt: utcTimestampSchema,
+});
+
+export const currentLifeDayReadSchema: z.ZodType<CurrentLifeDayRead> = z.object({
+  id: lifeDayIdSchema,
+  operationalDate: localDateSchema,
+  timezone: ianaTimeZoneSchema,
+  wokeAt: utcTimestampSchema,
+  sleptAt: utcTimestampSchema.nullable(),
+  revision: revisionSchema,
+  createdAt: utcTimestampSchema,
+  updatedAt: utcTimestampSchema,
+});
+
+export const todayTaskReadSchema: z.ZodType<TodayTaskRead> = z.object({
+  id: taskIdSchema,
+  lifeDayId: lifeDayIdSchema.nullable(),
+  title: z.string().min(1).max(500),
+  description: z.string().max(5000).nullable(),
+  status: taskStatusSchema,
+  priority: taskPrioritySchema,
+  scheduledAt: utcTimestampSchema.nullable(),
+  scheduledTimezone: ianaTimeZoneSchema.nullable(),
+  estimatedMinutes: estimatedMinutesSchema,
+  position: positionSchema,
+  completedAt: utcTimestampSchema.nullable(),
+  revision: revisionSchema,
+  createdAt: utcTimestampSchema,
+  updatedAt: utcTimestampSchema,
+});
+
+export const todaySnapshotSchema: z.ZodType<TodaySnapshot> = z.object({
+  profile: profileReadSchema,
+  lifeDay: currentLifeDayReadSchema.nullable(),
+  tasks: z.array(todayTaskReadSchema),
+});
+
+export const commandResultSchema: z.ZodType<CommandResult> = z.discriminatedUnion('status', [
+  z.object({
+    operationId: operationIdSchema,
+    status: z.enum(['accepted', 'duplicate_accepted']),
+    entity: z.object({
+      type: z.enum(['life_day', 'task']),
+      id: z.string().uuid(),
+      revision: revisionSchema,
+      data: z.record(z.string(), z.unknown()),
+    }),
+    syncCursor: z.number().int().nonnegative().nullable(),
+  }),
+  z.object({
+    operationId: operationIdSchema,
+    status: z.literal('conflict'),
+    error: z.object({
+      code: z.enum([
+        'unauthenticated',
+        'forbidden',
+        'not_found',
+        'validation_failed',
+        'invalid_timezone',
+        'repair_required',
+        'unresolved_tasks',
+        'revision_conflict',
+        'invalid_transition',
+      ]),
+      message: z.string().min(1),
+    }),
+    entity: z
+      .object({
+        type: z.enum(['life_day', 'task']),
+        id: z.string().uuid(),
+        revision: revisionSchema,
+        data: z.record(z.string(), z.unknown()),
+      })
+      .nullable(),
+    syncCursor: z.number().int().nonnegative().nullable(),
+  }),
+  z.object({
+    operationId: operationIdSchema,
+    status: z.literal('rejected'),
+    error: z.object({
+      code: z.enum([
+        'unauthenticated',
+        'forbidden',
+        'not_found',
+        'validation_failed',
+        'invalid_timezone',
+        'repair_required',
+        'unresolved_tasks',
+        'revision_conflict',
+        'invalid_transition',
+      ]),
+      message: z.string().min(1),
+    }),
+    entity: z.null(),
+    syncCursor: z.number().int().nonnegative().nullable(),
+  }),
+]);
+
+export const emailPasswordCredentialsSchema = z.object({
+  email: z.string().trim().email().max(320),
+  password: z.string().min(8).max(256),
 });

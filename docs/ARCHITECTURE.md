@@ -1,7 +1,13 @@
 # Architecture
 
-Last updated: 2026-07-17
-Status: recommended target architecture. Phase 1A now provides local Life Day/Today database commands and shared contracts, while product screens, authentication UI, offline replication, and hosted infrastructure remain unimplemented.
+Last updated: 2026-07-18
+Status: recommended target architecture. Phase 1B adds local email/password authentication, typed Supabase adapters, authenticated Today read RPCs, and minimal web/mobile Today surfaces. Offline replication and hosted infrastructure remain unimplemented.
+
+## Phase 1B client boundary
+
+`packages/api-client` is the only package that imports the Supabase JavaScript client. It validates command and read RPC responses with shared Zod schemas and supplies narrow authentication, Today-read, Life Day-command, and task-command adapters. Web uses browser session persistence; mobile uses Expo SecureStore for the Supabase Auth session only. Neither client has direct table writes, a local product-data store, realtime subscriptions, or an offline outbox.
+
+Phase 1B configures only local Supabase Auth for email/password sign-up and sign-in. The local CLI disables email confirmation so this narrow flow can be exercised without external email delivery. The apps consume public runtime configuration only; service-role keys remain server-only and are not configured in this repository.
 
 ## Recommendation
 

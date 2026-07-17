@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: [
+    '@personal-os/api-client',
     '@personal-os/config',
     '@personal-os/database-contracts',
     '@personal-os/domain',

@@ -137,6 +137,14 @@ environment supports its native binary requirements.
 - **Consequences:** Simpler RLS/sync and faster validation of personal workflow. Future additions require dedicated ADRs and migrations.
 - **Migration/rollback:** `user_id` ownership is explicit, enabling later workspace membership migration; no collaboration claim is made before then.
 
+## ADR-0014: Start local authentication with email and password
+
+- **Date:** 2026-07-18
+- **Status:** accepted
+- **Context:** Phase 1B needs one usable private-user authentication path without hosted credentials or a provider integration.
+- **Decision:** Enable local Supabase email/password sign-up and sign-in, with email confirmation disabled only in the local CLI configuration. Clients use the publishable key only. Social login, password reset, hosted configuration, and service-role use remain out of scope.
+- **Consequences:** The local flow is immediately testable, while production email confirmation and redirect policy require a separate deployment decision.
+
 ## Decisions to resolve in later phases
 
 1. Define precise progress metric/rollup formulas and historical recalculation rules before Progress Tracking.

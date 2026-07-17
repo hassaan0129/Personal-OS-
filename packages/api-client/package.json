@@ -1,5 +1,5 @@
 {
-  "name": "@personal-os/validation",
+  "name": "@personal-os/api-client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,6 +16,8 @@
     "@personal-os/database-contracts": "workspace:*",
     "@personal-os/domain": "workspace:*",
     "@personal-os/sync-contracts": "workspace:*",
+    "@personal-os/validation": "workspace:*",
+    "@supabase/supabase-js": "^2.110.7",
     "zod": "4.4.3"
   }
 }

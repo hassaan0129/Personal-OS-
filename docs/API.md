@@ -1,7 +1,13 @@
 # API
 
-Last updated: 2026-07-17
-Status: Phase 1A implements local Postgres RPC command functions for Life Days and Today tasks. The only implemented web route remains the unauthenticated health/status route; no Edge Function or hosted service has been created.
+Last updated: 2026-07-18
+Status: Phase 1B adds local email/password clients and narrow authenticated Today read RPCs to the Phase 1A command functions. No Edge Function or hosted service has been created.
+
+## Phase 1B implemented Today read RPCs
+
+`get_current_life_day`, `get_today_tasks`, and `get_today_snapshot` are authenticated-only RPCs with a fixed search path and an explicit `auth.uid()` check. They return only the caller's profile, active Life Day, and ordered non-archived tasks attached to that active Life Day. They grant no table write capability and expose neither `command_operations` nor generic cross-user rows.
+
+The shared `@personal-os/api-client` validates every RPC response against shared Zod contracts before it reaches either UI. Its auth adapter normalizes local Supabase email/password sessions without accepting a client-supplied user id. Authentication, reads, and writes use the local API URL and publishable key only.
 
 ## Phase 1A implemented command RPCs
 

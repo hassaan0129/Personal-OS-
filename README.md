@@ -1,6 +1,6 @@
 # Personal OS
 
-Personal OS is a private web and mobile workspace for turning long-term goals into daily execution and reflection. This repository contains the Phase 0 technical foundation plus the Phase 1A Life Day/Today backend: local SQL migrations, RLS, command RPCs, and shared contracts. It still has no authentication UI, product screens, mobile offline storage, goals, journals, reminders, sync engine, or hosted Supabase project.
+Personal OS is a private web and mobile workspace for turning long-term goals into daily execution and reflection. This repository contains the Phase 0 foundation, the Phase 1A Life Day/Today command boundary, and Phase 1B local email/password authentication with minimal web and mobile Today experiences. It still has no mobile offline replica/outbox, goals, journals, reminders, sync engine, or hosted Supabase project.
 
 ## Stack
 
@@ -28,10 +28,10 @@ On Windows PowerShell environments that block package-manager scripts, use `pnpm
    pnpm install
    ```
 
-2. Copy the safe environment templates only if you need to change public local settings. Supabase values are intentionally blank in Phase 0:
+2. Start the local Supabase stack, then copy the safe public-environment templates:
 
    ```bash
-   cp .env.example .env
+   pnpm supabase:start
    cp apps/web/.env.example apps/web/.env.local
    cp apps/mobile/.env.example apps/mobile/.env
    ```
@@ -39,12 +39,14 @@ On Windows PowerShell environments that block package-manager scripts, use `pnpm
    PowerShell equivalent:
 
    ```powershell
-   Copy-Item .env.example .env
+   pnpm.cmd supabase:start
    Copy-Item apps/web/.env.example apps/web/.env.local
    Copy-Item apps/mobile/.env.example apps/mobile/.env
    ```
 
-3. Start the web foundation at [http://localhost:3000](http://localhost:3000):
+   In each app file, set only `*_SUPABASE_URL` and `*_SUPABASE_PUBLISHABLE_KEY` to the API URL and publishable/anon key reported by your local Supabase CLI. Do not use, copy, or commit the service-role key. Local email confirmation is disabled solely in `supabase/config.toml`, so a local email/password sign-up can be used immediately.
+
+3. Start the web app at [http://localhost:3000](http://localhost:3000). Sign up or sign in, then use the minimal authenticated Today flow:
 
    ```bash
    pnpm --filter @personal-os/web dev
@@ -52,13 +54,13 @@ On Windows PowerShell environments that block package-manager scripts, use `pnpm
 
    Health route: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
-4. Start the Expo development server:
+4. Start the Expo development server. It uses the same local public configuration and supports sign-in, session restoration, Life Day wake/sleep, task creation, and task completion:
 
    ```bash
    pnpm --filter @personal-os/mobile start
    ```
 
-   Use the Expo terminal controls to launch an emulator/device. This initial screen only confirms the app starts; it does not contain product functionality.
+   Use the Expo terminal controls to launch an emulator/device. Phase 1B does not include mobile SQLite, an offline outbox, notifications, or physical-device verification.
 
 ## Commands
 
@@ -85,7 +87,7 @@ pnpm supabase:test
 
 `supabase:reset` rebuilds the **local** database from migrations. `supabase:test` runs the pgTAP RLS suite in `supabase/tests/` against that running local database. Stop the stack with `pnpm supabase:stop` when finished.
 
-At the current handoff, the CLI is installed but Docker Desktop's Linux engine is not running, so local migrations and pgTAP tests could not be executed. Start Docker Desktop, then run the three commands above before relying on database behavior.
+The local migration set and pgTAP suite were last reset and run successfully on 2026-07-18 (`Files=3`, `Tests=34`). The commands remain the required validation path after every schema change.
 
 ## Dependency build-script policy
 
@@ -94,8 +96,9 @@ pnpm 11 uses the explicit `allowBuilds` policy in `pnpm-workspace.yaml`. Phase 0
 ## Repository layout
 
 ```text
-apps/web/                         Next.js health/foundation surface
-apps/mobile/                      Expo Router launch/foundation surface
+apps/web/                         Next.js local-authenticated Today surface
+apps/mobile/                      Expo Router local-authenticated Today surface
+packages/api-client/              Typed Supabase Auth, Today-read, and command-RPC adapters
 packages/domain/                  Branded identifiers, time, revision, command metadata
 packages/validation/              Zod command and environment validation schemas
 packages/config/                  Typed public environment parsing

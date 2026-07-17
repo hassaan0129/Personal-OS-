@@ -1,7 +1,11 @@
 # Database
 
-Last updated: 2026-07-17
-Status: Phase 1A adds unexecuted local migrations for Auth-linked profiles, Life Days, Today tasks, command idempotency, audit events, and sync change hints. No database instance or external connection has been created.
+Last updated: 2026-07-18
+Status: Phase 1A schema and Phase 1B authenticated Today read migrations are local-only and validated against the local Supabase stack. No hosted project or external connection has been created.
+
+## Phase 1B read boundary
+
+`20260718010000_add_today_read_rpcs.sql` adds `get_current_life_day`, `get_today_tasks`, and `get_today_snapshot`. Each is executable only by `authenticated`, performs an explicit `auth.uid()` check, uses a fixed search path, and returns a safe JSON read model. No new table grants or RLS policies are added; direct lifecycle writes remain denied and must use the existing command RPCs.
 
 ## Phase 1A implemented schema
 

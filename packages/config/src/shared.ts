@@ -15,3 +15,19 @@ export const optionalSupabaseEnvironmentSchema = z
       });
     }
   });
+
+export interface SupabasePublicConfiguration {
+  readonly url: string;
+  readonly publishableKey: string;
+}
+
+export function requireSupabasePublicConfiguration(configuration: {
+  readonly url?: string | undefined;
+  readonly publishableKey?: string | undefined;
+}): SupabasePublicConfiguration {
+  if (configuration.url === undefined || configuration.publishableKey === undefined) {
+    throw new Error('Local Supabase public URL and publishable key are required.');
+  }
+
+  return { url: configuration.url, publishableKey: configuration.publishableKey };
+}
