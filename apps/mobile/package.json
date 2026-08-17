@@ -8,6 +8,7 @@
     "ios": "expo start --ios",
     "lint": "eslint . --max-warnings=0",
     "start": "expo start",
+    "test": "vitest run --pool=threads --maxWorkers=1 --no-fileParallelism",
     "typecheck": "tsc --noEmit",
     "validate": "expo export --platform android --output-dir dist",
     "web": "expo start --web"
@@ -24,8 +25,10 @@
     "expo-constants": "~57.0.6",
     "expo-crypto": "~57.0.1",
     "expo-linking": "~57.0.3",
+    "expo-network": "~57.0.1",
     "expo-router": "~57.0.7",
     "expo-secure-store": "~57.0.1",
+    "expo-sqlite": "~57.0.1",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.0",

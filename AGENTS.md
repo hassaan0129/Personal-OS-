@@ -1,76 +1,132 @@
-# Repository Instructions
+# Personal OS Agent Operating Contract
 
-This file extends the global Codex rules.
+## Mission and current state
 
-## Project identity
+Personal OS is a private, single-user web/mobile planning and execution system.
+It grows from explicit Life Days and daily tasks toward goals, reflection,
+reminders, progress tracking, and opt-in AI insight.
 
-- **Product:** Personal OS, a private web and mobile system for planning, execution, reflection, and progress tracking.
-- **Current objective:** Phase 1B local authentication and minimal Today experience; do not add offline product storage, notifications, goals, journals, analytics, AI, or deployment until their approved phases.
-- **Primary stack:** pnpm/Turborepo, Next.js App Router, Expo/React Native/Expo Router, strict TypeScript, Zod, and local Supabase migration structure.
-- **Package manager:** pnpm 11.10+ (`pnpm.cmd` may be required in restricted Windows PowerShell).
-- **Supported runtimes:** Node.js 22 LTS (`>=22 <25`); Python 3.10+ for verification.
+The committed baseline is Phase 1C. The current working tree intentionally
+contains uncommitted Phase 1D mobile SQLite/outbox work through Phase 1D-C5:
+offline task creation, editing, ordering, completion, reopening, cancellation,
+and rescheduling. It has focused automated coverage but not physical-device
+end-to-end proof. Read `docs/antigravity/START_HERE.md` before acting; it is the
+current handoff entry point.
 
-## Start here
+## Mandatory first pass
 
-Before changing code, read:
+Before editing, read:
 
-1. `README.md`
-2. `docs/PRODUCT.md`
-3. `docs/ARCHITECTURE.md`
-4. `docs/CURRENT_STATUS.md`
-5. the domain-specific docs relevant to the task
-6. existing tests and CI configuration
+1. `docs/antigravity/START_HERE.md`
+2. `README.md`
+3. `docs/ARCHITECTURE.md`, `docs/CURRENT_STATUS.md`, and `docs/MOBILE_SYNC.md`
+4. the relevant API/database/validation code and tests
+5. `git status --short` and the applicable diff
 
-Then inspect `git status` and summarize the execution path that will change.
-
-## Required workflow
-
-- For non-trivial tasks, create a plan with acceptance criteria, affected files, risks, and test commands before editing.
-- Implement in small steps and keep unrelated files untouched.
-- Add or update tests for behavior changes.
-- Update the relevant standard documentation in the same change.
-- Run during development: the narrow checks relevant to changed files.
-- Run before finishing: `python scripts/verify.py`.
-- Review the final diff and report changes, checks, remaining risks, migrations, and manual steps.
-
-## Project commands
-
-```text
-Install: pnpm install
-Web development: pnpm --filter @personal-os/web dev
-Mobile development: pnpm --filter @personal-os/mobile start
-Database/migrations: deferred; local Supabase structure exists but is not run in Phase 0
-Targeted tests: pnpm --filter @personal-os/validation test
-Full verification: python scripts/verify.py
-```
+Treat the repository and tests as authoritative over prior conversation
+history. Preserve the existing dirty working tree. Never reset, clean, checkout
+over, delete, or overwrite work merely to obtain a clean baseline.
 
 ## Architecture boundaries
 
-- `apps/*` may depend on `packages/*`; `packages/*` may not import application code.
-- `packages/domain`, `packages/validation`, `packages/database-contracts`, `packages/sync-contracts`, and `packages/utils` are framework-free. Do not import React, Expo, Next.js, or Supabase SDKs into them.
-- `packages/config` validates only public app configuration in Phase 0. Server secrets belong only in future server-only modules.
-- Generated directories (`node_modules`, `.next`, `.expo`, `dist`, `.turbo`, and `supabase/.temp`) must not be edited or committed.
-- No hosted external service is configured. Do not add Supabase Cloud project references, credentials, or service-role keys without explicit approval.
+- `apps/*` may import `packages/*`; packages must never import application code.
+- `packages/domain`, `validation`, `database-contracts`, `sync-contracts`, and
+  `utils` stay framework-free: no React, Expo, Next.js, or Supabase SDK imports.
+- Supabase PostgreSQL is authoritative. Mobile SQLite is only a user-scoped
+  local projection and durable command outbox; it is not a second source of
+  truth.
+- Invariant-bearing writes use typed, transactional command RPCs with an
+  operation ID and expected revision. Do not add direct client writes to Life
+  Days, tasks, events, or command records.
+- RLS, authenticated ownership checks, idempotency, revision conflicts, redacted
+  audit events, and sync hints are security boundaries. Never weaken them to
+  make a client or test pass.
+- Web creates one browser Supabase client. Mobile has its independent
+  SecureStore-backed client. Neither uses a service-role key.
 
-## Security
+## Product invariants
 
-- Never access production or real customer data.
-- Never read or print `.env` values, private keys, cloud credentials, or tokens.
-- Never weaken authorization or validation for convenience.
-- New environment variables must be documented with placeholders in `.env.example`.
-- Database and external side effects must be explicit, auditable, and tested.
+- One open Life Day per user; wake and sleep are explicit; midnight and naps do
+  not change it; missed sleep requires explicit repair.
+- No automatic task rollover. Unfinished work requires explicit overdue,
+  reschedule, or cancellation handling.
+- A Life Day has at most three active Top 3 tasks, enforced in the command
+  layer.
+- Offline commands retain their operation ID, expected revision, dependency
+  order, and user scope. Never silently rebase stale revisions or overwrite a
+  newer server version.
+- Journal text is private and must not appear in generic audit/change payloads.
 
-## Git and delivery
+## Safety rules
 
-- Use focused branches and commits.
-- Do not push, merge, publish, deploy, or run production migrations without explicit permission.
-- Preserve user changes and avoid destructive Git commands.
+Never run without explicit user approval:
 
-## Definition of done
+- `git reset --hard`, `git clean`, destructive checkout commands, or recursive
+  deletion outside an approved temporary directory;
+- `supabase db reset --linked`, destructive remote SQL, production deployments,
+  store submissions, commits, pushes, dependency upgrades, or lockfile
+  regeneration.
 
-- Acceptance criteria are satisfied.
-- Relevant tests exist and pass.
-- `python scripts/verify.py` passes.
-- No secret or accidental generated-file changes appear in the diff.
-- Documentation reflects the implemented state.
-- Remaining risks and manual actions are reported.
+Never read, print, copy, package, or commit `.env`, `.env.local`, access tokens,
+database passwords, service-role/secret keys, signing keys, certificates, or
+private keys. `.env.example` files contain names/placeholders only and may be
+included in handoffs. Do not access a hosted project or remote service unless
+the user explicitly authorizes that exact operation.
+
+## Scope and change discipline
+
+Make the smallest correct change. Add tests for behavior changes and update
+documentation in the same slice. Do not introduce goals, journals, reminders,
+notifications, recurrence, realtime, cursor pull, AI, web offline support, or
+deployment while working on the narrow Phase 1D mobile path without explicit
+approval.
+
+The next recommended task after C5 is offline Top 3 selection, but only after
+the existing mobile C5 runtime matrix is exercised on a physical device or
+emulator. Do not infer that physical-device testing occurred from an Expo export.
+
+## Verification expectations
+
+Run focused tests first, then direct mobile TypeScript/lint checks for mobile
+changes. Run `python scripts/verify.py` before handoff when the environment
+permits it, and report every blocked or failing stage honestly. Docker/local
+Supabase migration and pgTAP validation are required after database changes;
+do not run destructive remote equivalents. Do not claim device testing unless
+it was actually performed.
+
+Useful commands:
+
+```text
+pnpm --filter @personal-os/mobile test
+pnpm --filter @personal-os/mobile typecheck
+pnpm --filter @personal-os/mobile lint
+pnpm test
+pnpm supabase:reset       # local Docker only, after approved local schema work
+pnpm supabase:test        # local Docker only
+python scripts/verify.py
+git diff --check
+```
+
+On restricted Windows PowerShell, use `pnpm.cmd`.
+
+## Antigravity delegation map
+
+Use `.agents/agents/personal-os-orchestrator/agent.md` for planning and
+integration. Delegate bounded work only:
+
+- `architecture-reviewer`: read-only contract, package-boundary, and design review.
+- `mobile-offline-sync`: Expo SQLite, outbox, IDs, ordering, retries, conflicts,
+  merge, lifecycle recovery, and account isolation.
+- `supabase-database`: migrations, RLS, command RPCs, revisions, idempotency,
+  pgTAP, and hosted-development migration review.
+- `web-nextjs`: Next.js UI, typed adapters, browser singleton, accessibility,
+  web tests/builds.
+- `qa-verification`: read-only test planning/execution and precise evidence.
+- `security-auditor`: read-only secret, RLS, authorization, and bundle audit.
+- `documentation-maintainer`: implementation/status documentation only.
+- `release-readiness`: planning/audit for future EAS, stores, hosted Supabase,
+  web release, and privacy readiness; never deploy.
+
+The orchestrator must inspect the worktree first, plan before edits, preserve
+uncommitted work, require completion evidence, and never auto-approve a
+destructive action.

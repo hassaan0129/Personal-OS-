@@ -1,6 +1,6 @@
 # Personal OS
 
-Personal OS is a private web and mobile workspace for turning long-term goals into daily execution and reflection. This repository contains the Phase 0 foundation, Phase 1A Life Day/Today command boundary, Phase 1B local authentication, and Phase 1C daily Planner Mode/task-management slice. It still has no mobile offline replica/outbox, goals, journals, reminders, sync engine, or hosted Supabase project.
+Personal OS is a private web and mobile workspace for turning long-term goals into daily execution and reflection. This repository contains the Phase 0 foundation, Phase 1A Life Day/Today command boundary, Phase 1B local authentication, Phase 1C daily Planner Mode/task-management slice, and a narrow mobile SQLite/outbox path for task creation, editing, ordering, completion, reopening, cancellation, and rescheduling. It still has no broad offline Planner support, goals, journals, reminders, cursor-pull sync engine, or hosted Supabase project.
 
 ## Stack
 
@@ -54,13 +54,13 @@ On Windows PowerShell environments that block package-manager scripts, use `pnpm
 
    Health route: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
-4. Start the Expo development server. It uses the same local public configuration and supports sign-in, session restoration, Life Day wake/sleep, execution actions, and a compact online-only Planner Mode:
+4. Start the Expo development server. It uses the same local public configuration and supports sign-in, session restoration, cached Today content, foreground recovery, manual refresh/retry controls, offline-capable task creation/editing/ordering/completion/reopening/cancellation/rescheduling, online-only Life Day wake/sleep, and compact Planner Mode controls:
 
    ```bash
    pnpm --filter @personal-os/mobile start
    ```
 
-   Use the Expo terminal controls to launch an emulator/device. Phase 1B does not include mobile SQLite, an offline outbox, notifications, or physical-device verification.
+   Use the Expo terminal controls to launch an emulator/device. The current narrow offline path supports task creation, editing, ordering, completion, reopening, cancellation, and rescheduling only; notifications and physical-device verification remain out of scope.
 
 ## Commands
 

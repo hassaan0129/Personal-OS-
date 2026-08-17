@@ -2,8 +2,9 @@ import 'react-native-url-polyfill/auto';
 
 import { createSupabaseClient } from '@personal-os/api-client';
 import { parseMobileEnvironment, requireSupabasePublicConfiguration } from '@personal-os/config';
-import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
+
+import { generateMobileUuid } from './uuid';
 
 const sessionStorage = {
   getItem: (key: string) => SecureStore.getItemAsync(key),
@@ -37,7 +38,7 @@ export async function getDeviceId(): Promise<string> {
   const key = 'personal-os-device-id';
   const existing = await SecureStore.getItemAsync(key);
   if (existing !== null) return existing;
-  const value = Crypto.randomUUID();
+  const value = generateMobileUuid();
   await SecureStore.setItemAsync(key, value);
   return value;
 }

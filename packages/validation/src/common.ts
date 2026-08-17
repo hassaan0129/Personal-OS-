@@ -242,7 +242,7 @@ export const resolveUnfinishedTaskCommandSchema = z.object({
   ]),
 });
 
-const localDateSchema = z
+export const localDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)
   .transform((value) => value as CurrentLifeDayRead['operationalDate']);

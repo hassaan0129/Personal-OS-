@@ -10,5 +10,5 @@
     "noUnusedParameters": true,
     "strict": true
   },
-  "include": ["app/**/*.ts", "app/**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": ["app/**/*.ts", "app/**/*.tsx", "lib/**/*.ts", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
