@@ -10,16 +10,16 @@ The committed baseline is Phase 1C. The current working tree intentionally
 contains uncommitted Phase 1D mobile SQLite/outbox work through Phase 1D-C5:
 offline task creation, editing, ordering, completion, reopening, cancellation,
 and rescheduling. It has focused automated coverage but not physical-device
-end-to-end proof. Read `docs/antigravity/START_HERE.md` before acting; it is the
-current handoff entry point.
+end-to-end proof. Read `docs/PROJECT_STATE.md` and `docs/ARCHITECTURE.md` before
+acting.
 
 ## Mandatory first pass
 
 Before editing, read:
 
-1. `docs/antigravity/START_HERE.md`
-2. `README.md`
-3. `docs/ARCHITECTURE.md`, `docs/CURRENT_STATUS.md`, and `docs/MOBILE_SYNC.md`
+1. `README.md`
+2. `docs/PROJECT_STATE.md` and `docs/ARCHITECTURE.md`
+3. `docs/IMPLEMENTATION_MATRIX.md` and `docs/MOBILE_SYNC.md`
 4. the relevant API/database/validation code and tests
 5. `git status --short` and the applicable diff
 
@@ -130,3 +130,22 @@ integration. Delegate bounded work only:
 The orchestrator must inspect the worktree first, plan before edits, preserve
 uncommitted work, require completion evidence, and never auto-approve a
 destructive action.
+
+## Development workflow for every slice
+
+1. Read `AGENTS.md` and the canonical documentation listed above.
+2. Inspect `git status --short`, relevant diff, tests, source, and contracts.
+3. State scope, acceptance criteria, files, risks, and verification plan before
+   editing.
+4. Make the smallest reviewable change. Preserve existing Phase 1D work.
+5. Run focused tests first, then platform checks.
+6. Update status/architecture/API/database documents only when behavior or
+   contract truth changes.
+7. Run `git diff --check`, inspect for secrets/generated output, and report
+   actual outcomes.
+
+## Definition of done
+
+The relevant tests pass, scope is unchanged, documentation matches evidence,
+no secret/generated output appears in the diff, blocked checks are stated
+plainly, and no physical-device success is claimed without device evidence.

@@ -3,6 +3,75 @@
 Last updated: 2026-08-02
 Status: recommended target architecture. Phase 1C adds daily Planner Mode task commands and compact web/mobile planner surfaces on the Phase 1B authentication/read foundation. Phase 1D-C5 adds narrow mobile offline task ordering alongside task creation/editing/completion/reopening/cancellation/rescheduling; full offline replication and hosted infrastructure remain unimplemented.
 
+## Architecture Rules Summary
+
+This section is a quick-reference checklist of key architectural rules and
+constraints. Detailed explanations follow in later sections.
+
+### Source of truth and package direction
+
+- PostgreSQL behind Supabase is the authoritative system of record.
+- Mobile SQLite is a user-scoped read projection and durable command ledger; it
+  never wins a conflict or silently writes a canonical record.
+- `apps/*` may import shared `packages/*`; packages may not import application
+  code.
+- Domain, validation, database contracts, sync contracts, and utilities are
+  framework-free. `@personal-os/api-client` alone wraps `@supabase/supabase-js`.
+
+### Security boundaries
+
+- Use only the public/publishable Supabase key in browser and mobile clients.
+- No direct client writes to Life Days, tasks, events, sync changes, or command
+  operations. Use validated command RPCs.
+- Every meaningful write carries an operation ID, uses the expected revision,
+  checks authenticated ownership, commits transactionally, writes redacted
+  audit/task events, and emits a sync hint.
+- RLS and SQL privileges are intentional. Do not grant table access merely to
+  make a client or database test produce a nicer error.
+- Do not include journal bodies in generic audit data or safe error messages.
+
+### Client rules
+
+- Web obtains all adapters from one browser-only Supabase singleton; do not
+  instantiate a client in a component render, effect, or adapter factory.
+- Mobile keeps its own module-level client with SecureStore session persistence.
+- Expo UUIDs go through the mobile `expo-crypto` boundary; do not use browser
+  `globalThis.crypto.randomUUID()` in Expo Go.
+
+### Offline rules
+
+- A local mutation validates through the shared command schema before storage
+  and again before transmission.
+- Optimistic projection and outbox insertion commit in one exclusive SQLite
+  transaction. A local persistence failure rolls both back.
+- An outbox entry retains its stable operation ID, user ID, command envelope,
+  expected revision, safe error, sequence, target, and dependency.
+- Process commands in deterministic sequence. Same-task commands wait on the
+  prior command; temporary task commands wait on their create operation.
+- Create acknowledgement maps a temporary ID to the server ID and rewrites
+  queued dependent payloads transactionally before they can submit.
+- Retry only transient/network failures. Conflicts and permanent rejections
+  retain local intent in a safe issue state; never auto-rebase.
+- Sign-out stops processing and clears only the signed-in user's local rows.
+
+### Current C5 offline boundary
+
+Local-first UI support is limited to task create, edit, reorder, complete,
+reopen, cancel, and reschedule. Reorder accepts planned/in-progress/overdue
+tasks and uses fractional numeric positions. Reschedule accepts planned/overdue
+tasks only. Wake/sleep/repair, Top 3, unfinished resolution, cursor pull,
+realtime, and broad Planner operations remain online-only.
+
+### Product invariants
+
+- Life Days are explicit wake-to-sleep boundaries; midnight and naps do nothing.
+- A user has at most one open Life Day.
+- No task rolls over automatically.
+- Sleep requires explicit unfinished-task resolution.
+- A Life Day has at most three active Top 3 tasks, enforced in the database.
+
+---
+
 ## Phase 1C daily planner boundary
 
 Planner Mode is a product interaction mode, not an authorization boundary. The web app gets its auth, Today-read, Life Day-command, and task-command adapters from one browser-only Supabase client singleton; the adapters do not create clients. Mobile uses its own module singleton with SecureStore-backed Auth persistence. On both platforms, Planner Mode calls the same typed command RPCs as the execution UI.
@@ -61,25 +130,78 @@ flowchart LR
 | Notifications         | Mobile local and remote notifications                                                    | Expo Notifications + Expo Push initially | Keep provider abstraction so direct FCM/APNs remains possible.                                                            |
 | Web notifications     | Browser push, if approved as a requirement                                               | Service worker + Web Push                | No web push in first functional phase; provide in-app reminder visibility first.                                          |
 
-## Repository map to create during implementation
+## Repository map
 
 ```text
-apps/
-  web/                         Next.js App Router application
-  mobile/                      Expo React Native application
-packages/
-  domain/                      Pure business rules, schemas, types, period/time utilities
-  sync/                        Sync protocol and conflict contracts
-  api-client/                  Typed calls and transport abstractions
-  config/                      Shared lint, TypeScript, test configuration
-supabase/
-  migrations/                  Ordered SQL schema/RLS/function migrations
-  functions/                   Edge Functions (reminders, sync, future integrations)
-docs/                          Product and technical source-of-truth documents
-scripts/                       Verification/orchestration only; no production side effects
+personal-os/
+├── AGENTS.md                         Operating and safety contract
+├── README.md                         Local development and command overview
+├── package.json                      Root commands, engines, development tools
+├── pnpm-workspace.yaml               Workspaces and pnpm 11 build policy
+├── pnpm-lock.yaml                    Locked dependency graph
+├── turbo.json                        Task dependency graph
+├── tsconfig.base.json                Strict shared TypeScript settings
+├── eslint.config.mjs                 ESLint configuration
+├── .github/workflows/verify.yml      Pull-request verification
+├── .codex/                           Codex policy, secret-scan, and stop hooks
+├── .agents/agents/                   Antigravity specialist definitions
+├── apps/
+│   ├── web/                          Next.js App Router web application
+│   └── mobile/                       Expo Router mobile application
+├── packages/
+│   ├── api-client/                   Typed Supabase Auth/Today/RPC adapters
+│   ├── config/                       Public web/mobile configuration parsing
+│   ├── database-contracts/           Read-model TypeScript contracts
+│   ├── domain/                       IDs, time, revisions, Life Day/task rules
+│   ├── sync-contracts/               Command/result/change contracts
+│   ├── utils/                        Framework-free utilities
+│   └── validation/                   Shared Zod schemas
+├── supabase/
+│   ├── config.toml                   Local-only Supabase configuration
+│   ├── migrations/                   Ordered database/RPC/RLS migrations
+│   └── tests/database/               pgTAP command/RLS tests
+├── scripts/                          Verification and tooling
+└── docs/                             Product and technical documentation
 ```
 
-Do not share a cross-platform UI kit in the first release. Share domain logic, validation, and contracts; keep web semantics and mobile interaction patterns native to their platforms. A small token package can be introduced after a design system exists.
+### Entry points
+
+| Surface       | Location                                                                           | Role                                              |
+| ------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Web app       | `apps/web/app/page.tsx`                                                            | `/` Today route; delegates to `today-client.tsx`. |
+| Web Planner   | `apps/web/app/planner/page.tsx`                                                    | `/planner`, Planner Mode.                         |
+| Web health    | `apps/web/app/api/health/route.ts`                                                 | Public configuration health response.             |
+| Web client    | `apps/web/lib/supabase.ts`                                                         | Browser-only, hot-reload-safe client singleton.   |
+| Mobile app    | `apps/mobile` package `main: expo-router/entry`                                    | Expo Router entry.                                |
+| Mobile root   | `apps/mobile/app/_layout.tsx`                                                      | Root stack.                                       |
+| Mobile screen | `apps/mobile/app/index.tsx`                                                        | Authenticated Today and compact Planner Mode.     |
+| Mobile client | `apps/mobile/lib/supabase.ts`                                                      | SecureStore-backed mobile client singleton.       |
+| Offline core  | `apps/mobile/lib/local-store.ts`, `local-command-engine.ts`, `outbox-processor.ts` | SQLite projection/outbox and typed reconciliation.|
+
+### Database migration order
+
+1. `20260717000000_create_profiles.sql` — Auth profile trigger and profile RLS.
+2. `20260717010000_add_life_day_today_foundation.sql` — Life Days, tasks,
+   events, command operations, RLS, base command RPCs.
+3. `20260718010000_add_today_read_rpcs.sql` — owner-scoped Today reads.
+4. `20260718020000_add_planner_mode_task_commands.sql` — Top 3, planner RPCs,
+   ordering/reopening/unfinished resolution.
+
+### Test locations
+
+- `packages/*/src/*.test.ts`: domain, validation, config, adapter, utility rules.
+- `apps/web/lib/supabase.test.ts`: browser singleton regression.
+- `apps/mobile/lib/*.test.ts`: C5 local engine, outbox/rewrite, lifecycle,
+  controller, ordering, and UUID behavior.
+- `supabase/tests/database/*.test.sql`: pgTAP RLS/RPC behavior.
+
+### Important configuration
+
+- `.env.example`, `apps/web/.env.example`, `apps/mobile/.env.example`: public
+  variable names/placeholders only; never copy real values into a bundle.
+- `pnpm-workspace.yaml`: pnpm 11 `allowBuilds`, explicitly denying `sharp`.
+- `supabase/config.toml`: local-only API/database/Auth ports; no hosted project.
+- `scripts/verify.py`: canonical six-stage non-mutating verifier.
 
 ## State ownership and dependency rules
 

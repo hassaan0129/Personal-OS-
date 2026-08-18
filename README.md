@@ -110,6 +110,24 @@ supabase/tests/                   Local pgTAP RLS tests
 docs/                             Product, architecture, database, API, roadmap, decisions
 ```
 
+## Hosted development boundary
+
+The repository permits public client configuration to be supplied through an
+ignored local environment file, but it commits no hosted URL or credential.
+Before connecting to a hosted development project, confirm the project, public
+URL, publishable key, redirect URLs, migration procedure, and backup/rollback
+plan with the owner. Use no service-role key in web or mobile. Preview remote
+migrations first; do not apply them during normal feature work.
+
+## Future production builds
+
+No production build or deployment workflow is approved. Before adding one,
+define separate Supabase environments, release credentials outside source,
+EAS/Android/iOS signing ownership, secrets management, migration review,
+rollback, privacy disclosure, store metadata, and a device test matrix. Do not
+run EAS submit, store submission, production deployment, or remote migration
+commands without explicit approval.
+
 ## Documentation
 
 - [Product](docs/PRODUCT.md)
@@ -118,4 +136,10 @@ docs/                             Product, architecture, database, API, roadmap,
 - [API](docs/API.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Decisions](docs/DECISIONS.md)
-- [Current status](docs/CURRENT_STATUS.md)
+- [Mobile sync](docs/MOBILE_SYNC.md)
+- [Project state](docs/PROJECT_STATE.md)
+- [Implementation matrix](docs/IMPLEMENTATION_MATRIX.md)
+- [Next tasks](docs/NEXT_TASKS.md)
+- [Verification status](docs/VERIFICATION_STATUS.md)
+- [Lessons and known issues](docs/LESSONS.md)
+- [Design system](docs/DESIGN_SYSTEM.md)
