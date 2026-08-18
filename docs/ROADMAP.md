@@ -1,14 +1,14 @@
 # Roadmap
 
-Last updated: 2026-07-18
-Status: Phase 0, Phase 1A, Phase 1B, and the narrow Phase 1C daily Planner Mode flow are implemented. Later product work remains planned.
+Last updated: 2026-08-18
+Status: Phase 0 through Phase 1D (offline outbox) are implemented. Phase 2 (Core loop tightening + Journal) is next.
 
 ## Delivery principles
 
 - Each phase ends with a usable, testable slice and an explicit decision to continue.
 - Keep invariant-bearing writes behind tested commands and do not weaken RLS to simplify a client.
 - Do not promise offline support until a replica, outbox, recovery flow, and conflict tests exist.
-- Do not add goals, journals, notifications, recurrence, sharing, or AI to an incomplete Today foundation.
+- Do not add goals, notifications, recurrence, sharing, or AI to an incomplete Today foundation.
 
 ## Completed foundation
 
@@ -17,49 +17,62 @@ Status: Phase 0, Phase 1A, Phase 1B, and the narrow Phase 1C daily Planner Mode 
 - [x] Phase 1B: local email/password auth, session restoration, profile/current-Life-Day/Today read RPCs, typed client adapters, and minimal web/mobile Today actions.
 - [x] Phase 1C: daily Planner Mode, task editing/order/scheduling/Top 3, unfinished-task resolution, and web/mobile online-only controls.
 - [x] Local migration reset and pgTAP validation (58 tests on 2026-07-18).
+- [x] Phase 1D: Offline Today synchronization — user-bound mobile SQLite replica, durable command outbox (wake, sleep, create, complete, edit, reopen, cancel, reschedule, reorder), pending/retry/conflict states, sign-out clearing. 109 focused mobile tests + 135 workspace tests. Physical-device/emulator validation remains pending.
 
-## Phase 1D - Offline Today synchronization
+## Phase 2 — Core loop tightening + Journal
 
-**Outcome:** Mobile can safely use the narrow Today workflow while offline and reconcile exactly once when it reconnects.
+**Outcome:** Waking surfaces sleep duration and prompts a journal entry before Today. Journal entries (morning/night/ad-hoc) are captured, revisioned, and never hard-deleted.
 
-- [ ] Add a user-bound mobile SQLite Today replica and encrypted/cleared-on-sign-out local lifecycle.
-- [ ] Add a durable command outbox for supported wake, sleep, create-task, and complete-task commands.
-- [ ] Pull cursor-based changes and hydrate a snapshot on cursor expiry; do not add realtime subscriptions yet.
-- [ ] Surface pending, retried, rejected, and revision-conflict states with deterministic recovery.
-- [ ] Test offline retry/idempotency, sign-out clearing, stale revision, duplicate completion, and lost-network recovery.
+Full specification: [`PHASE2_SPEC.md`](PHASE2_SPEC.md).
 
-**Exit criteria:** supported Today commands survive reconnect without duplicate writes or silent data loss, and the app clearly presents unresolved conflicts.
+## Phase 3 — Reminders
 
-## Phase 2 - Goals and period planning
+**Outcome:** Sticky and recurring reminders, including 5× daily prayer with manual times.
 
-**Outcome:** The user can connect long-term goals and projects to selected month/week priorities and daily work.
+- [ ] Reminder schedules, delivery records, mobile permissions, and provider-safe delivery handling.
+- [ ] Sticky (one-shot) and recurring reminder types with user-configurable times.
+- [ ] Prayer reminder preset (5× daily, manually set times per user).
 
-- [ ] Add goals, projects, planning periods, period-goal links, ordering, history, and owner-scoped commands.
-- [ ] Build month/week planning reads and edits for web and mobile; daily Planner Mode remains a separate implemented slice.
-- [ ] Define and test period boundaries, travel/time-zone behavior, and planning conflicts.
+## Phase 4 — Goals
 
-## Phase 3 - Execution and Progress Tracking
+**Outcome:** Yearly → monthly → weekly goal hierarchy with Life Area links.
 
-**Outcome:** Focused work and accepted task events produce traceable progress.
+- [ ] Goal schema with period hierarchy (year → month → week), Life Area associations, and owner-scoped commands.
+- [ ] Planning reads and edits for web and mobile; daily Planner Mode remains a separate implemented slice.
+- [ ] Period boundaries, travel/time-zone behavior, and planning conflict rules.
 
-- [ ] Add execution sessions, metrics/measurements, documented rollup rules, and derived read models.
-- [ ] Implement execution commands and progress views with auditability.
+## Phase 5 — Finance
 
-## Phase 4 - Reminders, Journals, and History
+**Outcome:** Income/expense/savings tracking with auto-categorization hook and emergency fund as a goal.
 
-**Outcome:** Private reflection, recoverable edits, and best-effort mobile reminders.
+- [ ] Income, expense, and savings schema with category taxonomy.
+- [ ] Auto-categorization hook (rule-based first; AI-assisted categorization deferred to Phase 9).
+- [ ] Emergency fund modeled as a Goal (Phase 4 dependency).
 
-- [ ] Add private journal revisions/attachments and redacted generic audit history.
-- [ ] Add reminder schedules, delivery records, mobile permissions, and provider-safe delivery handling.
-- [ ] Add user-visible history, trash/restore, and retention behavior.
+## Phase 6 — Notes
 
-## Phase 5 - Hardening and beta readiness
+**Outcome:** Freeform notes, tagged and/or foldered, independent of the daily loop.
+
+- [ ] Note schema with tagging and folder organization.
+- [ ] Notes are not tied to Life Days — they exist independently.
+- [ ] Trash/restore following the established pattern.
+
+## Phase 7 — Universal trash/permanence pass
+
+**Outcome:** Apply the never-hard-delete pattern to Journal, Notes, Goals, Finance, and Reminders. Tasks already have it.
+
+- [ ] Audit all domain tables for consistent `trashed_at` / restore behavior.
+- [ ] Unified trash view across all domains.
+- [ ] Permanent delete only from inside trash, explicitly, with confirmation.
+
+## Phase 8 — Hardening and beta readiness
 
 - [ ] Evaluate PWA/web offline scope separately.
 - [ ] Add observability, export/delete workflows, restore drills, accessibility review, and load/security tests.
 - [ ] Establish preview/staging/release workflows without exposing production credentials.
 
-## Phase 6 - Opt-in AI analysis
+## Phase 9 — Opt-in AI analysis
 
 - [ ] Define consent, redacted inputs, retention, provenance, and approval-gated recommendation flow.
 - [ ] Store insights separately; AI never applies source-of-truth changes without user approval.
+- [ ] Weekly journal/sleep report to Gmail lives here.

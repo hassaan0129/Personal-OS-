@@ -1,42 +1,42 @@
 # Next Tasks
 
+Last updated: 2026-08-18. Current phase: **Phase 2 — Core loop tightening + Journal**.
+
+Full specification: [`PHASE2_SPEC.md`](PHASE2_SPEC.md).
+
 ## Recommended immediate next slice
 
-Before expanding offline behavior, run and record the B4/C5 physical-device or
-emulator matrix: fresh sign-in, cache restoration, online and offline create,
-offline dependent completion, app restart with pending work, reconnect ordering,
-temporary-to-server ID mapping, duplicate-accepted recovery, foreground
-reconciliation, manual refresh/retry, sign-out clearing, and second-account
-isolation. Fix only reproduced defects.
+Implement the Phase 2 journal data model, commands, and client-side core loop
+changes. Phase 1D offline work is done; the old priority table (device matrix,
+offline Top 3) is superseded by the Phase 2 roadmap.
 
-If that matrix passes, the next smallest feature slice is **offline Top 3
-selection** using the existing `task.set_top_three` contract. It must retain
-the current operation/revision/dependency rules and database-enforced maximum
-of three active Top 3 tasks.
+Physical-device/emulator validation of Phase 1D remains desirable but is not a
+blocker for Phase 2 backend and UI work.
 
 ## Priority tasks
 
-| Priority | Task                                   | Depends on                                         | Acceptance criteria                                                                                                 | Likely files                                   | Verification                              |
-| -------- | -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------- |
-| 1        | Record C5 native runtime matrix        | Existing C5 code and reachable development backend | Each scenario is marked pass/fail with device evidence; no speculative fixes                                        | Status docs; tests only for reproduced defects | Mobile test/typecheck/lint, device record |
-| 2        | Resolve a reproduced C5 defect, if any | Priority 1                                         | Minimal fix preserves RPC-only/RLS/operation/revision rules                                                         | Relevant mobile library/screen/test            | Focused tests plus device retest          |
-| 3        | Offline Top 3 plan/review              | Priorities 1–2                                     | Existing RPC/schema/lifecycle/top-three constraint inspected; no backend change assumed                             | Docs, source/tests after approval              | Review + focused test plan                |
-| 4        | Offline Top 3 implementation           | Approved plan                                      | Optimistic local projection, one durable command, dependencies, revision/conflict safety, fourth-selection behavior | Local engine/store/controller/screen/tests     | Mobile suite; device matrix               |
-| 5        | Fresh local database validation        | Docker available                                   | Migrations reset locally and pgTAP passes without RLS weakening                                                     | Normally none                                  | `supabase:reset`, `supabase:test`         |
-| 6        | Cursor-pull design                     | Stable offline command proof                       | Bounded API and snapshot-fallback contract documented/approved before code                                          | Architecture/API/database/decision docs        | Contract review                           |
-| 7        | Cursor-pull implementation             | Approved design                                    | Authenticated user-scoped incremental pull/full fallback preserves pending intents                                  | API/mobile sync/tests, maybe backend           | Focused + local database + device tests   |
-| 8        | Conflict-resolution UX design          | Cursor/refresh evidence                            | Explicit discard/review/retry semantics without automatic rebase                                                    | Product/architecture/UI tests                  | Review                                    |
-| 9        | Component decomposition                | Stable behavior                                    | Web/mobile screens split without behavior regression                                                                | App components/tests                           | Workspace tests/build/export              |
-| 10       | Next product domain plan               | Offline Today is proven                            | One bounded domain, commands/RLS/history/sync impact and acceptance criteria approved                               | Planning docs                                  | Architecture/database review              |
+| Priority | Task | Depends on | Acceptance criteria | Verification |
+| -------- | ---- | ---------- | ------------------- | ------------ |
+| 1 | Add `journal_entries` + `journal_entry_revisions` migration | None | Tables created with correct columns, types, constraints, and FK relationships. `entry_type` check constraint (`morning`, `night`, `adhoc`). `mood` check constraint (1–5). | `supabase:reset` succeeds |
+| 2 | Add journal RLS policies | Priority 1 | Owner-only read/write on both tables. No cross-user access. | pgTAP RLS tests |
+| 3 | Add journal command RPCs | Priority 2 | `command_create_journal_entry`, `command_update_journal_entry`, `command_trash_journal_entry`, `command_restore_journal_entry` — following existing task command shape | pgTAP command tests |
+| 4 | pgTAP test coverage | Priority 3 | RLS (owner-only read/write), revision creation on edit, trash/restore round-trip, entry_type validation, mood range validation | `supabase:test` passes |
+| 5 | Mobile: sleep duration on wake screen | None (client-only) | After wake, compute and display `wake.occurred_at - previous_sleep.occurred_at`. Read-only, no schema change. | Manual device/emulator check |
+| 6 | Mobile: journal prompt between wake and Today | Priority 3 (needs create RPC) | Skippable in one tap. Captures entry_type, mood (1–5), body. Does not block reaching Today. | Manual device/emulator check |
+| 7 | Web: journal prompt between wake and Today | Priority 3 (needs create RPC) | Same behavior as mobile. Can lag mobile if needed. | Manual browser check |
+| 8 | Full verification sequence | Priorities 1–7 | `python scripts/verify.py` passes. pgTAP results reported. No lint/typecheck/test/build regressions. | Verification report |
 
-Do not begin goals, journals, reminders, notifications, AI, realtime, web
-offline, or deployment until the prerequisite evidence and an approved plan
-exist.
+## Out of scope for Phase 2
+
+Do not begin Reminders, Goals, Finance, Notes, voice journal, mood-trend
+analytics, AI weekly report, realtime, web offline, or deployment until Phase 2
+is complete and verified.
 
 ## Manual checks for the next developer
 
 - Verify the web client remains a singleton after a hard refresh and auth works locally.
-- Run the full wake → plan → resolve unfinished → sleep flow against local Supabase.
+- Run the full wake → journal prompt (create + skip) → Today → plan → resolve unfinished → sleep flow against local Supabase.
+- Confirm journal entries appear in a list view and can be edited (with revision preserved) and trashed/restored.
 - Run offline task create/edit/complete on an emulator only after the mobile screen is wired; reconnect and confirm one authoritative task/event per operation.
 - Sign out with cached local state and confirm another account cannot access it.
-- Inspect Supabase Studio only for local test data to verify owner IDs, revisions, task events, change events, and command records.
+- Inspect Supabase Studio only for local test data to verify owner IDs, revisions, journal entries, journal entry revisions, and command records.

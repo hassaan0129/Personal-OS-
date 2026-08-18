@@ -61,9 +61,12 @@ Last reconstructed from the working tree: 2026-08-02.
 
 ## Planned or intentionally deferred
 
-Goals/projects, monthly/weekly planning, progress, journals, reminders,
-notifications, recurrence, realtime, cursor pull, web offline, export/delete,
-production deployment, account recovery/social login, collaboration, and AI.
+Phase 2 (Core loop tightening + Journal) is the current next phase. Remaining
+planned phases in order: Reminders (Phase 3), Goals (Phase 4), Finance (Phase 5),
+Notes (Phase 6), Universal trash/permanence pass (Phase 7), Hardening and beta
+readiness (Phase 8), Opt-in AI analysis (Phase 9). Also deferred: realtime,
+cursor pull, web offline, export/delete, production deployment, account
+recovery/social login, and collaboration.
 
 ## Current hosted-development boundary
 
